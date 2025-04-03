@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(SIMPARSE VERSION 0.1.0 LANGUAGES C CXX)
+project(SIMPARSE VERSION 0.1.1 LANGUAGES C CXX)
 
 # Obtain the commit hash
 execute_process(COMMAND git rev-parse HEAD
