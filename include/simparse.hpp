@@ -132,6 +132,17 @@ auto operator+(F&& f, G&& g) {
     };
 }
 
+template<typename F, typename G>
+auto operator|(F&& f, G&& g) {
+    return [=]<CharIterator I>(I& str_iter) {
+        try {
+            return f(str_iter);
+        } catch (const std::runtime_error&) {
+            return g(str_iter);
+        }
+    };
+}
+
 
 /// @brief Parses a single character from the input iterator.
 /// @tparam I The type of the input iterator.

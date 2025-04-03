@@ -44,6 +44,21 @@ TEST(ParseTests, String) {
     EXPECT_THROW(parser(it), std::runtime_error);
 }
 
+TEST(ParseTests, OrParse) {
+    std::string str = "abcdef";
+    auto it = str.begin();
+    auto parser = simparse::string("abc") | simparse::string("def");
+
+    std::string result = parser(it);
+    EXPECT_EQ(result, "abc");
+    EXPECT_EQ(it, str.begin() + 3);
+
+    result = parser(it);
+    EXPECT_EQ(result, "def");
+    EXPECT_EQ(it, str.end());
+    EXPECT_THROW(parser(it), std::runtime_error);
+}
+
 TEST(ParseTests, ExampleTest) {
     std::string str = "VARIABLES= \"var1\", \"var2\" ,\"var3\" , \"var4\"";
     auto it = str.begin();
