@@ -68,7 +68,7 @@ auto many(F&& parser) {
         while (true) {
             try {
                 result += parser(str_iter);
-            } catch (const std::runtime_error&) {
+            } catch (std::runtime_error&) {
                 break;
             }
         }
@@ -86,11 +86,27 @@ auto exclude(char c) {
     return satisfy([=](char s) { return c != s; });
 }
 
+/// @brief Creates a parser that matches a specific character.
+/// @tparam F The type of the parser function.
+/// @param c The character to match.
+/// @return A parser function that matches the given character.
+/// @note This parser will consume characters until the specified character is matched.
+///       If the character is not matched, it will throw an exception.
+inline auto character(char c) {
+    return satisfy([=](char s) { return c == s; });
+}
+
+/// @brief Creates a parser that matches a specific string.
+/// @tparam F The type of the parser function.
+/// @param str The string to match.
+/// @return A parser function that matches the given string.
+/// @note This parser will consume characters until the entire string is matched.
+///       If the string is not matched, it will throw an exception.
 inline auto string(std::string str) {
     return [=]<CharIterator I>(I& str_iter) {
         for (char c : str) {
             if (*str_iter != c) {
-                throw std::runtime_error("String not matched.");
+                throw std::runtime_error("String not matched: \"" + str + "\"");
             }
             ++str_iter;
         }

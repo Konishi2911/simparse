@@ -59,6 +59,49 @@ TEST(ParseTests, OrParse) {
     EXPECT_THROW(parser(it), std::runtime_error);
 }
 
+TEST(ParseTests, Ignore) {
+    std::string str = "   abc   ";
+    auto it = str.begin();
+    auto parser = simparse::ignore(simparse::many(simparse::whitespace)) + simparse::string("abc") + simparse::ignore(simparse::many(simparse::whitespace));
+    std::string result = parser(it);
+
+    EXPECT_EQ(result, "abc");
+    EXPECT_EQ(it, str.end());
+}
+
+TEST(ParseTests, Many) {
+    std::string str = "abcabc";
+    auto it = str.begin();
+    auto parser = simparse::many(simparse::any_char);
+    std::string result = parser(it);
+
+    EXPECT_EQ(result, "abcabc");
+    EXPECT_EQ(it, str.end());
+}
+
+TEST(ParseTests, Back) {
+    std::string str = "abc";
+    auto it = str.begin();
+    auto parser = simparse::back(simparse::string("acb"));
+
+    EXPECT_THROW(parser(it), std::runtime_error);
+    EXPECT_EQ(it, str.begin());
+}
+
+TEST(ParseTests, Whitespace) {
+    std::string str = "   abc   ";
+    auto it = str.begin();
+    auto parser = simparse::many(simparse::whitespace);
+
+    std::string result = parser(it);
+    EXPECT_EQ(result, "   ");
+    EXPECT_EQ(it, str.begin() + 3);
+
+    result = parser(it);
+    EXPECT_EQ(result, "");
+    EXPECT_EQ(it, str.begin() + 3);
+}
+
 TEST(ParseTests, ExampleTest) {
     std::string str = "VARIABLES= \"var1\", \"var2\" ,\"var3\" , \"var4\"";
     auto it = str.begin();
@@ -96,4 +139,46 @@ TEST(ParseTests, ExampleTest) {
     EXPECT_EQ(item4, "var4");
 
     EXPECT_THROW(item(it), std::runtime_error);
+}
+
+TEST(ParseTests, ExampleTest2) {
+    auto label_parser =  
+        simparse::ignore( 
+            simparse::many(simparse::whitespace) 
+        ) +
+        simparse::many(simparse::alphabet) + 
+        simparse::ignore(
+            simparse::many(simparse::whitespace) + 
+            simparse::string("=") + 
+            simparse::many(simparse::whitespace)
+        );
+
+    auto single_entry_parser = simparse::back(
+        simparse::ignore(simparse::many(simparse::string("\""))) + 
+        simparse::many(simparse::alphanumeric | simparse::whitespace) + 
+        simparse::ignore(
+            simparse::many(simparse::string("\"")) + 
+            simparse::many(simparse::string(","))
+        )
+    );
+
+    auto labels = std::string("I = 1, J = 2, K = 3");
+    auto it = labels.begin();
+
+    auto label1 = label_parser(it);
+    auto var1 = single_entry_parser(it);
+    EXPECT_EQ(label1, "I");
+    EXPECT_EQ(var1, "1");
+
+    auto label2 = label_parser(it);
+    auto var2 = single_entry_parser(it);
+    EXPECT_EQ(label2, "J");
+    EXPECT_EQ(var2, "2");
+
+    auto label3 = label_parser(it);
+    auto var3 = single_entry_parser(it);
+    EXPECT_EQ(label3, "K");
+    EXPECT_EQ(var3, "3");
+
+    EXPECT_THROW(label_parser(it), std::runtime_error);
 }
