@@ -131,6 +131,28 @@ auto back(F&& parser) {
     };
 }
 
+/// @brief Peeks at the parser without consuming characters.
+/// @tparam F The type of the parser function.
+/// @param parser The parser function to use.
+/// @return A parser function that peeks at the given parser object.
+/// @note This parser will not consume any characters from the input iterator.
+///       It will return the result of the parser without modifying the iterator.
+///       If the parser fails, it will throw an exception and the iterator will not be modified.
+template<typename F>
+auto peek(F&& parser) {
+    return [=]<CharIterator I>(I& str_iter) {
+        auto pos = str_iter;
+        try {
+            auto str = parser(str_iter);
+            str_iter = pos;
+            return str;
+        } catch (const std::runtime_error&) {
+            str_iter = pos;
+            throw;
+        }
+    };
+}
+
 /// @brief Concatenates the parsers.
 /// @tparam F The type of the first parser function.
 /// @tparam G The type of the second parser function.

@@ -88,6 +88,16 @@ TEST(ParseTests, Back) {
     EXPECT_EQ(it, str.begin());
 }
 
+TEST(ParseTests, Peek) {
+    std::string str = "abc";
+    auto it = str.begin();
+    auto parser = simparse::peek(simparse::string("ab"));
+
+    std::string result = parser(it);
+    EXPECT_EQ(result, "ab");
+    EXPECT_EQ(it, str.begin());
+}
+
 TEST(ParseTests, Whitespace) {
     std::string str = "   abc   ";
     auto it = str.begin();
